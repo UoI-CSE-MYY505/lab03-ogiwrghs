@@ -98,6 +98,50 @@ outShowRowLoop:
 # ----------------------------------------
 
 rgb888_to_rgb565:
+    sw s0 0(sp)
+    sw s1 4(sp)
+    sw s2 8(sp)
+    
+    addi s0 a0 0 #address of arxikos pinakas (888)
+    addi s1 a3 0   #address of 565
+    mul t0 a1 a2    #dimensions
+    
+    
+conversionloop:
+    
+    beq t0,zero,endloop
+    
+    lb t1, 0(s0) #r
+    lb t2, 1(s0) #g
+    lb t3, 2(s0) #b
+    
+#check for negative
+    andi t1,t1,0xff
+    andi t2,t2,0xff
+    andi t3,t3,0xff
+  
+    srli t1,t1,3 #shift right by 3 (for 5 bits)
+    srli t2,t2,2 #by 2 cuz its green
+    srli t3,t3,3
+
+    slli t1,t1,11
+    slli t2,t2,5
+    or t1,t1,t2
+    or t1,t1,t3
+
+    sh t1,0(s1) #store 565 
+
+    addi s0,s0,3
+    addi s1,s1,2
+    addi t0,t0,-1
+
+    j conversionloop
+
+endloop:
+    lw s0,0(sp)
+    lw s1,4(sp)
+    lw s2,8(sp)
+    addi sp,sp 12
 # ----------------------------------------
 # Write your code here.
 # You may move the "return" instruction (jalr zero, ra, 0).
